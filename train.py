@@ -79,13 +79,14 @@ def train_all_models(gpu):
     The aggregate training
     """
     comp_ind_list = get_list_comp_ind(gpu)
-    for hidden_layer_num in [8]:
+    for hidden_layer_num in [4]:
     #for hidden_layer_num in [1, 3, 5, 7]:
         for neurons in [20, 50, 10]:
             for reg_scale in [0.1, 0.5, 1, 2, 4, 8, 16]:
                 for comp_ind in comp_ind_list:
                     flags = flag_reader.read_flag()
                     flags.comp_ind = comp_ind
+                    flags.reg_scale = reg_scale
                     flags.linear = [flags.dim_x] + [neurons for i in range(hidden_layer_num)] + [flags.dim_y]
                     flags.model_name = flags.data_set + '_ind_' + str(flags.comp_ind) + '_complexity_{}x{}_lr_{}_decay_{}_reg_{}_bs_{}'.format(flags.linear[1], len(flags.linear) - 2, flags.lr, flags.lr_decay_rate, flags.reg_scale, flags.batch_size)
                     print(flags.model_name)
