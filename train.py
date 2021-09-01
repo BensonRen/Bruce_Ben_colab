@@ -79,22 +79,23 @@ def train_all_models(gpu):
     The aggregate training
     """
     comp_ind_list = get_list_comp_ind(gpu)
-    for hidden_layer_num in [7]:
+    for hidden_layer_num in [8]:
     #for hidden_layer_num in [1, 3, 5, 7]:
-        for neurons in [20, 50, 100, 200, 500]:
-            for comp_ind in comp_ind_list:
-                flags = flag_reader.read_flag()
-                flags.comp_ind = comp_ind
-                flags.linear = [flags.dim_x] + [neurons for i in range(hidden_layer_num)] + [flags.dim_y]
-                flags.model_name = flags.data_set + '_ind_' + str(flags.comp_ind) + '_complexity_{}x{}_lr_{}_decay_{}_reg_{}_bs_{}'.format(flags.linear[1], len(flags.linear) - 2, flags.lr, flags.lr_decay_rate, flags.reg_scale, flags.batch_size)
-                print(flags.model_name)
-                training_from_flag(flags)
+        for neurons in [20, 50, 10]:
+            for reg_scale in [0.1, 0.5, 1, 2, 4, 8, 16]:
+                for comp_ind in comp_ind_list:
+                    flags = flag_reader.read_flag()
+                    flags.comp_ind = comp_ind
+                    flags.linear = [flags.dim_x] + [neurons for i in range(hidden_layer_num)] + [flags.dim_y]
+                    flags.model_name = flags.data_set + '_ind_' + str(flags.comp_ind) + '_complexity_{}x{}_lr_{}_decay_{}_reg_{}_bs_{}'.format(flags.linear[1], len(flags.linear) - 2, flags.lr, flags.lr_decay_rate, flags.reg_scale, flags.batch_size)
+                    print(flags.model_name)
+                    training_from_flag(flags)
 
 if __name__ == '__main__':
     # Read the parameters to be set
     flags = flag_reader.read_flag()
     # Call the train from flag function
-    training_from_flag(flags)
-    #train_all_models(-1)
+    #training_from_flag(flags)
+    train_all_models(-1)
     #for i in range(4):
     #    get_list_comp_ind(i)
