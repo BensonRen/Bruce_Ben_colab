@@ -161,6 +161,7 @@ class Network(object):
                 
                 # Set to Evaluation Mode
                 self.model.eval()
+
                 print("Doing Evaluation on the model now")
                 test_loss = []
                 for j, (geometry, spectra) in enumerate(self.test_loader):  # Loop through the eval set

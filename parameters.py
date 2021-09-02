@@ -6,7 +6,8 @@ COMP_IND = 10693
 
 SKIP_CONNECTION = False
 USE_CONV = False
-DIM_X = 8190
+AVERAGE_EVERY_N = 5
+DIM_X = int(8190 / AVERAGE_EVERY_N)
 DIM_Y = 1
 
 LINEAR = [DIM_X, 50, 50, 50, 50, DIM_Y]      #Still using two FC layers to have compatiable number of input parameters to tconv layers
@@ -17,11 +18,11 @@ CONV_STRIDE = []
 # Hyperparameters
 OPTIM = "Adam"
 REG_SCALE = 1e-2
-BATCH_SIZE = 128
-EVAL_STEP = 2
+BATCH_SIZE = 16
+EVAL_STEP = 5
 TRAIN_STEP = 100
-LEARN_RATE = 1e-3
-LR_DECAY_RATE = 0.2
+LEARN_RATE = 1e-1
+LR_DECAY_RATE = 0.5
 STOP_THRESHOLD = 1e-9
 DROPOUT = 0
 SKIP_HEAD = 3

@@ -16,7 +16,7 @@ from torch import pow, add, mul, div, sqrt
 
 
 class Forward(nn.Module):
-    def __init__(self, flags, fre_low=0.8, fre_high=1.5):
+    def __init__(self, flags):
         super(Forward, self).__init__()
 
         self.skip_connection = flags.skip_connection

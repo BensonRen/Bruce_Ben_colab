@@ -9,9 +9,19 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 import torch
+def take_average(arr, every_n):
+    """
+    The function that takes the average of every n elements in the array
+    :param: The array to be averaged
+    :param: every_n: average every n elements
+    """
+    l, w = np.shape(arr)
+    arr_avg = np.mean(arr.reshape([l, -1, every_n]), axis=2)
+    print('before take average', np.shape(arr))
+    print('after take average', np.shape(arr_avg))
+    return arr_avg
 
-
-def get_data_into_loaders(data_x, data_y, batch_size, DataSetClass, rand_seed=1, test_ratio=0.05):
+def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1, test_ratio=0.05, average=None):
     """
     Helper function that takes structured data_x and data_y into dataloaders
     :param data_x: the structured x data
@@ -40,6 +50,11 @@ def get_data_into_loaders(data_x, data_y, batch_size, DataSetClass, rand_seed=1,
     y_train = y_train[train_shuffle_index]
     x_test = x_test[test_shuffle_index]
     y_test = y_test[test_shuffle_index]
+    
+    # This step is to get the averaged data for 5/10/15 minutes
+    if average is not None:
+        x_train = take_average(x_train, average)
+        x_test = take_average(x_test, average)
     
     print('total number of training sample is {}, the dimension of the feature is {}'.format(len(x_train),
                                                                                              len(x_train[0])))
@@ -87,7 +102,7 @@ def read_data_bruce(flags, eval_data_all=False):
         return get_data_into_loaders(data_x, data_y, flags.batch_size, 
                 SimulatedDataSet_xd_to_1d_class, test_ratio=0.98)
     return get_data_into_loaders(data_x, data_y, flags.batch_size, SimulatedDataSet_xd_to_1d_class,
-                                 test_ratio=flags.test_ratio)
+                                 test_ratio=flags.test_ratio, average=flags.average)
 
 
 def read_data(flags, eval_data_all=False):
