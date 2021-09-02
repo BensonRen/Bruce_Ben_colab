@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from flag_reader import load_flags
 import glob
+import shutil
 
 def analze_runs(mother_dir='models/'):
     """
@@ -34,12 +35,21 @@ def analze_runs(mother_dir='models/'):
         for folder in folder_list:
             # Skip if this folder does not have a flags.obj
             if not os.path.isfile(os.path.join(folder, 'flags.obj')):
+                # Remove this entry since we are going to delete the whole list afterwards
+                folder_list.remove(folder)
                 continue
             flag = load_flags(folder)
             comp_ind, insample, outsample = flag.comp_ind, flag.best_training_loss, flag.best_validation_loss
             result_mat.append([comp_ind, insample, outsample])
         print('shape of result mat is ', np.shape(result_mat))
         np.savetxt(result_name, result_mat, delimiter=',')
+
+        # Deleting those folders
+        for folder in folder_list:
+            if 'model' in folder:
+                #print('removing file')
+                shutil.rmtree(folder)
+
         #quit()
         #with open(result_name, 'a') as fout:
         #    fout.write('comp_ind, insample_mse, outsample_mse')
