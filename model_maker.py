@@ -14,8 +14,7 @@ import torch.nn.functional as F
 import torch
 from torch import pow, add, mul, div, sqrt
 
-
-class Forward(nn.Module):
+class MLP(nn.Module):
     def __init__(self, flags):
         super(Forward, self).__init__()
 
@@ -116,4 +115,59 @@ class Forward(nn.Module):
             # Final touch, because the input is normalized to [-1,1]
             # S = tanh(out.squeeze())
             #out = out.squeeze()
+        return out
+
+
+
+########################
+# The CNN class        #
+########################
+class CNN(nn.Module):
+    def __init__(self, flags):
+        super(CNN, self).__init__()
+
+        """
+        General layer definitions:
+        """
+        # Linear Layer and Batch_norm Layer definitions here
+        self.linears = nn.ModuleList([])
+        self.bn_linears = nn.ModuleList([])
+        #self.dropout = nn.ModuleList([])       #Dropout layer was tested for fixing overfitting problem
+        for ind, fc_num in enumerate(flags.linear[0:-1]):               # Excluding the last one as we need intervals
+            self.linears.append(nn.Linear(fc_num, flags.linear[ind + 1]))
+            self.bn_linears.append(nn.BatchNorm1d(flags.linear[ind + 1]))
+            #self.dropout.append(nn.Dropout(p=0.05))
+
+        # Conv Layer definitions here
+        self.convs = nn.ModuleList([])
+        self.bn_convs = nn.ModuleList([])
+        in_channel = 1                                                  # Initialize the in_channel number
+        
+        def sub_module(in_channel, out_channel):
+            return nn.Sequential(   nn.Conv2d(in_channel, out_channel, kernel_size=(5, 3), stride=(3, 1)),
+                                    nn.LeakyReLU(0.1),
+                                    nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1)))
+        # deining those channels
+        self.CNN_module_list = []
+        prev_channel = 1        # Setting the start of the channel number
+        for channel in flags.channel_list:
+            self.CNN_module_list.append(sub_module(prev_channel, channel))
+            prev_channel = channel
+
+        self.fc_out = nn.Linear(flags.last_dim, 1)
+
+    def forward(self, X):
+        """
+        The forward function which defines how the network is connected
+        :param X: The input X (Since this is a forward network)
+        :return: Y: The Y
+        """
+        out = X                                                         # initialize the out
+        
+        # The CNN modules
+        for CNN_modules in self.CNN_module_list:
+            out = CNN_modules(out)
+
+        # The linear module
+        out = self.fc_out(out)
         return out

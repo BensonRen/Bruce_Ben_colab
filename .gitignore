@@ -3,6 +3,7 @@
 # The output file 
 *.out
 *.err
+**.zip
 
 # The bash script
 *.sh

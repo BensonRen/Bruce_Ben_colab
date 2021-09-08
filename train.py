@@ -13,7 +13,7 @@ import sys
 import flag_reader
 import data_reader
 from class_wrapper import Network
-from model_maker import Forward
+from model_maker import MLP, CNN 
 from helper_functions import put_param_into_folder, write_flags_and_BVE
 
 
@@ -32,7 +32,7 @@ def training_from_flag(flags):
     print("Making network now")
 
     # Make Network
-    ntwk = Network(Forward, flags, train_loader, test_loader)
+    ntwk = Network(MLP, flags, train_loader, test_loader)
     total_param = sum(p.numel() for p in ntwk.model.parameters() if p.requires_grad)
     print("Total learning parameter is: %d"%total_param)
     
