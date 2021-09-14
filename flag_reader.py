@@ -21,7 +21,8 @@ def read_flag():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data-set', default=DATA_SET, type=str, help='which data set you are chosing')
     parser.add_argument('--comp-ind', default=COMP_IND, type=int, help='the company index to be trained')
-    parser.add_argument('--average', default=AVERAGE_EVERY_N, type=int, help='the dimension of Y')
+    parser.add_argument('--average', default=AVERAGE_EVERY_N, type=int, help='take every n dimension of x and take average')
+    parser.add_argument('--square', default=SQUARE, type=bool, help='take the square of the input dimension')
     parser.add_argument('--dim-x', default=DIM_X, type=int, help='the dimension of X')
     parser.add_argument('--dim-y', default=DIM_Y, type=int, help='the dimension of Y')
 

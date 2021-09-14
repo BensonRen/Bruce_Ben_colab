@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 import torch
+
 def take_average(arr, every_n):
     """
     The function that takes the average of every n elements in the array
@@ -21,7 +22,7 @@ def take_average(arr, every_n):
     print('after take average', np.shape(arr_avg))
     return arr_avg
 
-def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1, test_ratio=0.05, average=None):
+def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1, test_ratio=0.05, average=None, square=False):
     """
     Helper function that takes structured data_x and data_y into dataloaders
     :param data_x: the structured x data
@@ -36,6 +37,13 @@ def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1
     
     # new shuffle scheme to account for the bruce dataset
     train_test_bound = 1237
+    
+    # Square it for the sake of volatility analysis
+    if square:
+        data_x = np.square(data_x)
+        print('the dataset is squared')
+        assert np.min(data_x) > 0, 'the dataset is squared and therefore the minimum value should be larger than 0'
+
     x_train, y_train = data_x[:train_test_bound, :], data_y[:train_test_bound]
     x_test, y_test = data_x[train_test_bound:, :], data_y[train_test_bound:]
     
@@ -102,7 +110,7 @@ def read_data_bruce(flags, eval_data_all=False):
         return get_data_into_loaders(data_x, data_y, flags.batch_size, 
                 SimulatedDataSet_xd_to_1d_class, test_ratio=0.98)
     return get_data_into_loaders(data_x, data_y, flags.batch_size, SimulatedDataSet_xd_to_1d_class,
-                                 test_ratio=flags.test_ratio, average=flags.average)
+                                 test_ratio=flags.test_ratio, average=flags.average, square=flags.square)
 
 
 def read_data(flags, eval_data_all=False):

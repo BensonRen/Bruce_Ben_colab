@@ -16,7 +16,7 @@ from torch import pow, add, mul, div, sqrt
 
 class MLP(nn.Module):
     def __init__(self, flags):
-        super(Forward, self).__init__()
+        super(MLP, self).__init__()
 
         self.skip_connection = flags.skip_connection
         self.use_conv = flags.use_conv

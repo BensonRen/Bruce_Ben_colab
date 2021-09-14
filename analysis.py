@@ -44,11 +44,11 @@ def analze_runs(mother_dir='models/'):
         print('shape of result mat is ', np.shape(result_mat))
         np.savetxt(result_name, result_mat, delimiter=',')
 
-        # Deleting those folders
-        for folder in folder_list:
-            if 'model' in folder:
-                #print('removing file')
-                shutil.rmtree(folder)
+        ## Deleting those folders
+        #for folder in folder_list:
+        #    if 'model' in folder:
+        #        #print('removing file')
+        #        shutil.rmtree(folder)
 
         #quit()
         #with open(result_name, 'a') as fout:
