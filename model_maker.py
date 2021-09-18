@@ -129,27 +129,26 @@ class CNN(nn.Module):
         """
         General layer definitions:
         """
-        # Linear Layer and Batch_norm Layer definitions here
-        self.linears = nn.ModuleList([])
-        self.bn_linears = nn.ModuleList([])
-        #self.dropout = nn.ModuleList([])       #Dropout layer was tested for fixing overfitting problem
-        for ind, fc_num in enumerate(flags.linear[0:-1]):               # Excluding the last one as we need intervals
-            self.linears.append(nn.Linear(fc_num, flags.linear[ind + 1]))
-            self.bn_linears.append(nn.BatchNorm1d(flags.linear[ind + 1]))
-            #self.dropout.append(nn.Dropout(p=0.05))
+        # # Linear Layer and Batch_norm Layer definitions here
+        # self.linears = nn.ModuleList([])
+        # self.bn_linears = nn.ModuleList([])
+        # #self.dropout = nn.ModuleList([])       #Dropout layer was tested for fixing overfitting problem
+        # for ind, fc_num in enumerate(flags.linear[0:-1]):               # Excluding the last one as we need intervals
+        #     self.linears.append(nn.Linear(fc_num, flags.linear[ind + 1]))
+        #     self.bn_linears.append(nn.BatchNorm1d(flags.linear[ind + 1]))
+        #     #self.dropout.append(nn.Dropout(p=0.05))
 
         # Conv Layer definitions here
-        self.convs = nn.ModuleList([])
-        self.bn_convs = nn.ModuleList([])
-        in_channel = 1                                                  # Initialize the in_channel number
+        #self.convs = nn.ModuleList([])
+        #self.bn_convs = nn.ModuleList([])
         
         def sub_module(in_channel, out_channel):
-            return nn.Sequential(   nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1)),
+            return nn.Sequential(   nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(2, 2)),
                                     nn.LeakyReLU(0.1),
                                     nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)))
         # deining those channels
-        self.CNN_module_list = []
-        prev_channel = 1        # Setting the start of the channel number
+        self.CNN_module_list = nn.ModuleList([])
+        prev_channel = 4        # Setting the start of the channel number
         for channel in flags.channel_list:
             self.CNN_module_list.append(sub_module(prev_channel, channel))
             prev_channel = channel
@@ -163,12 +162,18 @@ class CNN(nn.Module):
         :return: Y: The Y
         """
         out = X                                                         # initialize the out
-        print(out.size())
+        #print(out.size())
+        #out = out.permute(0, 3, 1, 2)
+        #print(out.size())
         # The CNN modules
         for CNN_modules in self.CNN_module_list:
+            #print(CNN_modules)
             out = CNN_modules(out)
-            print(out.size())
+            #print(out.size())
 
+        # Get rid of the last 2 dimensions
+        out = out.squeeze()
+        #print(out.size())
         # The linear module
         out = self.fc_out(out)
         return out

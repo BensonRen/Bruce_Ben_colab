@@ -139,7 +139,7 @@ class Network(object):
                 logit = self.model(geometry)                        # Get the output
                 # print("logit type:", logit.dtype)
                 # print("spectra type:", spectra.dtype)
-                loss = self.make_loss(logit, spectra)              # Get the loss tensor
+                loss = self.make_loss(logit, spectra, image=self.flags.use_conv)              # Get the loss tensor
                 loss.backward()                                # Calculate the backward gradients
                 # torch.nn.utils.clip_grad_value_(self.model.parameters(), 10)
                 self.optm.step()                                    # Move one step the optimizer
@@ -174,7 +174,7 @@ class Network(object):
                         geometry = geometry.cuda()
                         spectra = spectra.cuda()
                     logit = self.model(geometry)
-                    loss = self.make_loss(logit, spectra)                   # compute the loss
+                    loss = self.make_loss(logit, spectra, image=self.flags.use_conv)                   # compute the loss
                     test_loss.append(np.copy(loss.cpu().data.numpy()))                                       # Aggregate the loss
                     del loss, logit
 

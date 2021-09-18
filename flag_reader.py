@@ -26,11 +26,14 @@ def read_flag():
     parser.add_argument('--dim-x', default=DIM_X, type=int, help='the dimension of X')
     parser.add_argument('--dim-y', default=DIM_Y, type=int, help='the dimension of Y')
 
+
+    parser.add_argument('--last-dim', default=LAST_DIM, type=int, help='the dimension of the end of the convolution layer')
     
     # Model Architectural Params
     parser.add_argument('--skip-connection', type=bool, default=SKIP_CONNECTION, help='The boolean flag indicates whether use skip connections')
     parser.add_argument('--use-conv', type=bool, default=USE_CONV, help='The boolean flag that indicate whether we use upconv layer if not using lorentz')
     parser.add_argument('--linear', type=list, default=LINEAR, help='The fc layers units')
+    parser.add_argument('--channel-list', type=list, default=CHANNEL_LIST, help='The output channel of convolution')
     parser.add_argument('--conv-out-channel', type=list, default=CONV_OUT_CHANNEL, help='The output channel of your 1d conv')
     parser.add_argument('--conv-kernel-size', type=list, default=CONV_KERNEL_SIZE, help='The kernel size of your 1d conv')
     parser.add_argument('--conv-stride', type=list, default=CONV_STRIDE, help='The strides of your 1d conv')

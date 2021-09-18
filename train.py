@@ -32,7 +32,10 @@ def training_from_flag(flags):
     print("Making network now")
 
     # Make Network
-    ntwk = Network(MLP, flags, train_loader, test_loader)
+    if flags.use_conv:
+        ntwk = Network(CNN, flags, train_loader, test_loader)
+    else:
+        ntwk = Network(MLP, flags, train_loader, test_loader)
     total_param = sum(p.numel() for p in ntwk.model.parameters() if p.requires_grad)
     print("Total learning parameter is: %d"%total_param)
     

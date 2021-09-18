@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from skimage import io
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
+import torchvision.transforms as transforms
 import torch
 
 def take_average(arr, every_n):
@@ -128,7 +129,7 @@ def read_data_high_fre(flags, eval_data_all=False, get_raw_data=False):
 
 def read_data_image(flags, eval_data_all=False, get_raw_data=False):
     # Read the data
-    data_dir = os.path.join('/home/sr365/Bruce/image_data', flags.comp_ind)
+    data_dir = os.path.join('/home/sr365/Bruce/image_data', str(flags.comp_ind))
     print("data_dir = ", data_dir)
     # Read the data y
     y = pd.read_csv(os.path.join(data_dir, 'ydf.csv'))
@@ -142,13 +143,18 @@ def read_data_image(flags, eval_data_all=False, get_raw_data=False):
         big_image_list[ind] = image_cur
     # Get the Y label part
     y_label = y['Y'] == 'LONG'
+    # print(type(y_label))
+    # print(np.shape(y_label[cut_off:]))
+    # print(len(big_image_list[cut_off:]))
     # Create the image dataset
-    train_dataset = ImageDataset(big_image_list[:cut_off], y_label[:cut_off])
+    train_dataset = ImageDataset(big_image_list[:cut_off], y_label[:cut_off].values)
     train_loader = torch.utils.data.DataLoader(train_dataset, flags.batch_size)
     
-    test_dataset = ImageDataset(big_image_list[cut_off:], y_label[cut_off:])
+    test_dataset = ImageDataset(big_image_list[cut_off:], y_label[cut_off:].values)
     test_loader = torch.utils.data.DataLoader(test_dataset, flags.batch_size)
     
+    print('size of train set = {}, test set = {}'.format(len(train_dataset), len(test_dataset)))
+
     return train_loader, test_loader
 
 
@@ -243,12 +249,13 @@ class ImageDataset(Dataset):
         'Initialization'
         self.X = X
         self.y = y
+        self.transform = transforms.Compose([transforms.ToTensor()])
     def __len__(self):
         'Denotes the total number of samples'
         return len(self.X)
     def __getitem__(self, index):
         'Generates one sample of data'
         # Select sample
-        image = self.X[index]
-        label = self.y[index]
+        image = self.transform(self.X[index])
+        label = self.y[index].astype('long')
         return image, label
