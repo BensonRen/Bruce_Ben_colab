@@ -13,7 +13,7 @@ import sys
 import flag_reader
 import data_reader
 from class_wrapper import Network
-from model_maker import MLP, CNN 
+from model_maker import MLP, CNN
 from helper_functions import put_param_into_folder, write_flags_and_BVE
 
 
@@ -81,10 +81,10 @@ def train_all_models(gpu):
     The aggregate training
     """
     comp_ind_list = get_list_comp_ind(gpu)
-    for hidden_layer_num in [8]:
+    for hidden_layer_num in [6]:
     #for hidden_layer_num in [1, 3, 5, 7]:
-        for reg_scale in [0.1, 1, 16]:
-            for neurons in [20, 50, 100, 500]:
+        for reg_scale in [0.1]:#, 1, 16]:
+            for neurons in [20, 50]:#, 100, 500]:
                 for comp_ind in comp_ind_list:
                     flags = flag_reader.read_flag()
                     flags.comp_ind = comp_ind
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     # Read the parameters to be set
     flags = flag_reader.read_flag()
     # Call the train from flag function
-    #training_from_flag(flags)
-    train_all_models(-1)
+    training_from_flag(flags)
+    #train_all_models(-1)
     #for i in range(4):
     #    get_list_comp_ind(i)

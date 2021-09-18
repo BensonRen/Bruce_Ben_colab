@@ -6,6 +6,7 @@ import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from skimage import io
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 import torch
@@ -17,12 +18,21 @@ def take_average(arr, every_n):
     :param: every_n: average every n elements
     """
     l, w = np.shape(arr)
-    arr_avg = np.mean(arr.reshape([l, -1, every_n]), axis=2)
+    arr_avg = np.sum(arr.reshape([l, -1, every_n]), axis=2)
+    #arr_avg = np.sum(arr.reshape([l, every_n, -1 ]), axis=1)
     print('before take average', np.shape(arr))
+    if every_n == 390:      # This mean each day we take average
+        d_x = np.sum(arr_avg[:, :1], axis=1)
+        w_x = np.sum(arr_avg[:, 1:5], axis=1)
+        m_x = np.sum(arr_avg[:, 5:21], axis=1)
+        arr_avg = np.transpose(np.vstack([d_x, w_x, m_x]))
+        print(np.shape(arr_avg))
     print('after take average', np.shape(arr_avg))
     return arr_avg
 
-def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1, test_ratio=0.05, average=None, square=False):
+def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1, 
+                        test_ratio=0.05, average=None, square=False,
+                        shuffle=False):
     """
     Helper function that takes structured data_x and data_y into dataloaders
     :param data_x: the structured x data
@@ -42,7 +52,7 @@ def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1
     if square:
         data_x = np.square(data_x)
         print('the dataset is squared')
-        assert np.min(data_x) > 0, 'the dataset is squared and therefore the minimum value should be larger than 0'
+        assert np.min(data_x) >= 0, 'the dataset is squared and therefore the minimum value should be larger than 0'
 
     x_train, y_train = data_x[:train_test_bound, :], data_y[:train_test_bound]
     x_test, y_test = data_x[train_test_bound:, :], data_y[train_test_bound:]
@@ -50,14 +60,15 @@ def get_data_into_loaders(data_x, data_y,  batch_size, DataSetClass, rand_seed=1
     # Get the length of the training data
     train_len, test_len = len(x_train), len(x_test)
     
-    # Shuffle them
-    train_shuffle_index = np.random.permutation(train_len)
-    test_shuffle_index = np.random.permutation(test_len)
+    if shuffle:
+        # Shuffle them
+        train_shuffle_index = np.random.permutation(train_len)
+        test_shuffle_index = np.random.permutation(test_len)
 
-    x_train = x_train[train_shuffle_index]
-    y_train = y_train[train_shuffle_index]
-    x_test = x_test[test_shuffle_index]
-    y_test = y_test[test_shuffle_index]
+        x_train = x_train[train_shuffle_index]
+        y_train = y_train[train_shuffle_index]
+        x_test = x_test[test_shuffle_index]
+        y_test = y_test[test_shuffle_index]
     
     # This step is to get the averaged data for 5/10/15 minutes
     if average is not None:
@@ -98,7 +109,7 @@ def normalize_np(x):
     return x
 
 
-def read_data_bruce(flags, eval_data_all=False):
+def read_data_high_fre(flags, eval_data_all=False, get_raw_data=False):
     # Read the data
     data_dir = '/home/sr365/Bruce/cvdata'
     print("data_dir = ", data_dir)
@@ -106,11 +117,39 @@ def read_data_bruce(flags, eval_data_all=False):
     data = data.astype(np.float32)
     data_x = data[:, 1:]
     data_y = data[:, 0]
+    if get_raw_data:
+        return data_x, data_y
+
     if eval_data_all:
         return get_data_into_loaders(data_x, data_y, flags.batch_size, 
                 SimulatedDataSet_xd_to_1d_class, test_ratio=0.98)
     return get_data_into_loaders(data_x, data_y, flags.batch_size, SimulatedDataSet_xd_to_1d_class,
                                  test_ratio=flags.test_ratio, average=flags.average, square=flags.square)
+
+def read_data_image(flags, eval_data_all=False, get_raw_data=False):
+    # Read the data
+    data_dir = os.path.join('/home/sr365/Bruce/image_data', flags.comp_ind)
+    print("data_dir = ", data_dir)
+    # Read the data y
+    y = pd.read_csv(os.path.join(data_dir, 'ydf.csv'))
+    # The training testing separation
+    cut_off = int(0.8*len(y))
+    # Read the image data x
+    big_image_list = [None for i in range(len(y))]
+    for ind, row in y.iterrows():
+        file_name = os.path.join(data_dir, 'image', row['Date'] + '.png')
+        image_cur = io.imread(file_name)
+        big_image_list[ind] = image_cur
+    # Get the Y label part
+    y_label = y['Y'] == 'LONG'
+    # Create the image dataset
+    train_dataset = ImageDataset(big_image_list[:cut_off], y_label[:cut_off])
+    train_loader = torch.utils.data.DataLoader(train_dataset, flags.batch_size)
+    
+    test_dataset = ImageDataset(big_image_list[cut_off:], y_label[cut_off:])
+    test_loader = torch.utils.data.DataLoader(test_dataset, flags.batch_size)
+    
+    return train_loader, test_loader
 
 
 def read_data(flags, eval_data_all=False):
@@ -123,7 +162,10 @@ def read_data(flags, eval_data_all=False):
     """
     print("In read_data, flags.data_set =", flags.data_set)
     if 'bruce' in flags.data_set or 'Bruce' in flags.data_set:
-        train_loader, test_loader = read_data_bruce(flags, eval_data_all=eval_data_all)
+        train_loader, test_loader = read_data_high_fre(flags, eval_data_all=eval_data_all)
+    if 'image' in flags.data_set:
+        train_loader, test_loader = read_data_image(flags, eval_data_all=eval_data_all)
+    
     else:
         sys.exit("Your flags.data_set entry is not correct, check again!")
     return train_loader, test_loader
@@ -194,3 +236,19 @@ class SimulatedDataSet_regress(Dataset):
 
     def __getitem__(self, ind):
         return self.x[ind, :], self.y[ind, :]
+
+
+class ImageDataset(Dataset):
+    def __init__(self, X, y):
+        'Initialization'
+        self.X = X
+        self.y = y
+    def __len__(self):
+        'Denotes the total number of samples'
+        return len(self.X)
+    def __getitem__(self, index):
+        'Generates one sample of data'
+        # Select sample
+        image = self.X[index]
+        label = self.y[index]
+        return image, label

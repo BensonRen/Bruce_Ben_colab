@@ -11,7 +11,7 @@ def analze_runs(mother_dir='models/'):
     """
 
     # First get the list of run params
-    run_param_list = []
+    run_param_list, run_pre_list = [], []
     for folder in os.listdir(mother_dir):
         cur_folder = os.path.join(mother_dir, folder)
         # print(cur_folder)
@@ -19,16 +19,18 @@ def analze_runs(mother_dir='models/'):
         if not os.path.isdir(cur_folder) or not folder.startswith('bruce'):
             continue
         run_name = folder.split('complexity_')[-1]
+        run_name_prev = folder.split('return_')[-1].split('_ind')[0] 
         print(run_name)
         # Check whether this fun is already included and put that there
         if not run_name in run_param_list:
+            run_pre_list.append(run_name_prev)
             run_param_list.append(run_name)
     print('The run param list is ', run_param_list)
     
     # Now, with a list of run params, get those id and 
-    for run_param in run_param_list:
-        result_name = os.path.join(mother_dir, run_param + '.csv')
-        folder_list = [ a for a in glob.glob(os.path.join(mother_dir, '*' + run_param)) if os.path.isdir(a) ]
+    for run_name_prev, run_param in zip(run_pre_list, run_param_list):
+        result_name = os.path.join(mother_dir, run_name_prev + run_param + '.csv')
+        folder_list = [ a for a in glob.glob(os.path.join(mother_dir, '*' + run_param)) if os.path.isdir(a) and run_name_prev in a ]
         print('len of folder_list = ', len(folder_list))
         result_mat = []
         # Loop over the folders
@@ -44,7 +46,7 @@ def analze_runs(mother_dir='models/'):
         print('shape of result mat is ', np.shape(result_mat))
         np.savetxt(result_name, result_mat, delimiter=',')
 
-        ## Deleting those folders
+        # Deleting those folders
         #for folder in folder_list:
         #    if 'model' in folder:
         #        #print('removing file')

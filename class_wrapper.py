@@ -54,7 +54,7 @@ class Network(object):
         print(model)
         return model
 
-    def make_loss(self, logit=None, labels=None):
+    def make_loss(self, logit=None, labels=None, image=False):
         """
         Create a tensor that represents the loss. This is consistant both at training time \
         and inference time for Backward model
@@ -63,9 +63,14 @@ class Network(object):
         """
         if logit is None:
             return None
-        MSE_loss = nn.functional.mse_loss(logit, labels)          # The MSE Loss of the
-        BDY_loss = 0 # Implemenation later in the backward propagation model
-        return MSE_loss + BDY_loss
+        # If this is a image based implementation, use Cross entropy loss
+        if image:
+            CEloss = nn.functional.cross_entropy(logit, labels)
+            return CEloss
+        else:
+            # Otherwise this is a normal MSE loss
+            MSE_loss = nn.functional.mse_loss(logit, labels)          # The MSE Loss of the
+            return MSE_loss
 
     def make_optimizer(self):
         """

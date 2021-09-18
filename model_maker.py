@@ -144,9 +144,9 @@ class CNN(nn.Module):
         in_channel = 1                                                  # Initialize the in_channel number
         
         def sub_module(in_channel, out_channel):
-            return nn.Sequential(   nn.Conv2d(in_channel, out_channel, kernel_size=(5, 3), stride=(3, 1)),
+            return nn.Sequential(   nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1)),
                                     nn.LeakyReLU(0.1),
-                                    nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1)))
+                                    nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)))
         # deining those channels
         self.CNN_module_list = []
         prev_channel = 1        # Setting the start of the channel number
@@ -154,7 +154,7 @@ class CNN(nn.Module):
             self.CNN_module_list.append(sub_module(prev_channel, channel))
             prev_channel = channel
 
-        self.fc_out = nn.Linear(flags.last_dim, 1)
+        self.fc_out = nn.Linear(flags.last_dim, 2)
 
     def forward(self, X):
         """
@@ -163,10 +163,11 @@ class CNN(nn.Module):
         :return: Y: The Y
         """
         out = X                                                         # initialize the out
-        
+        print(out.size())
         # The CNN modules
         for CNN_modules in self.CNN_module_list:
             out = CNN_modules(out)
+            print(out.size())
 
         # The linear module
         out = self.fc_out(out)

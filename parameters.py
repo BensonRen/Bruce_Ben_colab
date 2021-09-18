@@ -1,29 +1,37 @@
 """
 Parameter file for specifying the running parameters for forward model
 """
-DATA_SET = 'bruce_high_freq_return'
-COMP_IND = 10693
+#DATA_SET = 'bruce_high_freq_return'
+DATA_SET = 'image'
+COMP_IND = 10107
 
 SKIP_CONNECTION = False
 USE_CONV = False
-AVERAGE_EVERY_N = 1
 SQUARE = True
-DIM_X = int(8190 / AVERAGE_EVERY_N)
+AVERAGE_EVERY_N = 390
+#DIM_X = int(8190 / AVERAGE_EVERY_N)
+DIM_X = 3
 DIM_Y = 1
 
-LINEAR = [DIM_X, 50, 50, 50, 50, DIM_Y]      #Still using two FC layers to have compatiable number of input parameters to tconv layers
+# The parameter set for linear model
+LINEAR = [DIM_X,  DIM_Y]      #Still using two FC layers to have compatiable number of input parameters to tconv layers
 CONV_OUT_CHANNEL = []
+CONV_KERNEL_SIZE = []
+CONV_STRIDE = []
+
+# The parameter set for image model
+CONV_OUT_CHANNEL = [16, 32 ,64]
 CONV_KERNEL_SIZE = []
 CONV_STRIDE = []
 
 # Hyperparameters
 OPTIM = "Adam"
-REG_SCALE = 1e-2
-BATCH_SIZE = 16
-EVAL_STEP = 5
-TRAIN_STEP = 100
-LEARN_RATE = 1e-1
-LR_DECAY_RATE = 0.5
+REG_SCALE = 0
+BATCH_SIZE = 256
+EVAL_STEP = 10
+TRAIN_STEP = 500
+LEARN_RATE = 1e-2
+LR_DECAY_RATE = 0.2
 STOP_THRESHOLD = 1e-9
 DROPOUT = 0
 SKIP_HEAD = 3
