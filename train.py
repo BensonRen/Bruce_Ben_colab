@@ -97,11 +97,34 @@ def train_all_models(gpu):
                     print(flags.model_name)
                     training_from_flag(flags)
 
+
+def sweep_image_model():
+    """
+    The function for doing image sweeping
+    """
+    for c1 in [4, 8, 16]:
+        for c2 in [2, 4]:
+            for c3 in [2, 4]:
+                for c4 in [1, 2]:
+                    flags = flag_reader.read_flag()
+                    print(c1)
+                    flags.channel_list = c1 * np.array([1, c2, c2*c3, c2*c3*c4])
+                    print('channel list = ', flags.channel_list)
+                    flags.last_dim = flags.channel_list[-1]
+                    flags.model_name = flags.data_set + '_channel_' + str(flags.channel_list).replace('[','').replace(']','').replace(' ','_') + \
+                                        '_dim_last_' + str(flags.last_dim) + '_ind_' + str(flags.comp_ind) + \
+                                        '_lr_{}_decay_{}_reg_{}_bs_{}'.format(flags.lr, flags.lr_decay_rate, flags.reg_scale, flags.batch_size)
+                    print(flags.model_name)
+                    training_from_flag(flags)
+
+
+
 if __name__ == '__main__':
     # Read the parameters to be set
     flags = flag_reader.read_flag()
     # Call the train from flag function
-    training_from_flag(flags)
+    #training_from_flag(flags)
+    sweep_image_model()
     #train_all_models(-1)
     #for i in range(4):
     #    get_list_comp_ind(i)
